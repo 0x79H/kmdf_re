@@ -424,7 +424,8 @@ def imp_cb(ea, name, ord):
 
 def load_kmdf_types_into_idb():
     header_path = idautils.GetIdbDir()
-    idaapi.idc_parse_types("".join([header_path, "WDFStructs.h"]), idc.PT_FILE)
+    # change relative path to use more easily
+    idaapi.idc_parse_types("".join([header_path, "../Tools/kmdf_re/code/WDFStructs.h"]), idc.PT_FILE)
     for idx in range(1, idc.GetMaxLocalType()):
         print(idx, idc.GetLocalTypeName(idx))
         idc.Til2Idb(idx, idc.GetLocalTypeName(idx))
