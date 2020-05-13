@@ -394,7 +394,7 @@ def assign_kmdf_structure_types(address):
     argument_WdfComponentGlobals = find_function_arg(call_wdfVersionBind, "lea", "r9", 0)
     wdfComponentGlobals = idc.GetOperandValue(argument_WdfComponentGlobals, 1)
     g_vars["_WDF_COMPONENT_GLOBALS"] = wdfComponentGlobals
-    idc.SetType(wdfComponentGlobals, "PWDF_DRIVER_GLOBALS")
+    idc.SetType(wdfComponentGlobals, 'PWDF_DRIVER_GLOBALS')
     idc.MakeName(wdfComponentGlobals, '_WdfComponentGlobals')
 
     # Now assign the WDFFUNCTIONS to FuncTable
@@ -406,23 +406,36 @@ def assign_kmdf_structure_types(address):
     print('WDF minor version ' + str(version))
 
     def get_wdffunctions_struct_name(version):
-        name = "_WDFFUNCTIONS_V100"
+        name = '_WDFFUNCTIONS_V100'
 
         if version >= 5 and version < 9:
-             name = "_WDFFUNCTIONS_V105"
+             name = '_WDFFUNCTIONS_V105'
         elif version >= 9 and version < 11:
-            name = "_WDFFUNCTIONS_V109"
+            name = '_WDFFUNCTIONS_V109'
         elif version >= 11 and version < 13:
-            name = "_WDFFUNCTIONS_V111"
+            name = '_WDFFUNCTIONS_V111'
         elif version >= 13 and version < 15:
-            name = "_WDFFUNCTIONS_V113"
-        elif version >= 15:
-            name = "_WDFFUNCTIONS_V115"
+            name = '_WDFFUNCTIONS_V113'
+        elif version >= 15 and version < 19:
+            name = '_WDFFUNCTIONS_V115'
+        elif version >= 19 and version < 21:
+            name = '_WDFFUNCTIONS_V119'
+        elif version >= 21 and version < 23:
+            name = '_WDFFUNCTIONS_V121'
+        elif version >= 23 and version < 25:
+            name = '_WDFFUNCTIONS_V123'
+        elif version >= 25:
+            name = '_WDFFUNCTIONS_V125'
 
         return name
 
     struct_name = get_wdffunctions_struct_name(version)
-    assign_struct_to_address(wdfFunctions, struct_name)
+
+    if version < 15:
+        assign_struct_to_address(wdfFunctions, struct_name)
+    else:
+        idc.SetType(wdfFunctions, struct_name + ' *')
+
     idc.MakeName(wdfFunctions, 'g_WdfF_Functions')
     #if not assign_struct_to_address(wdfFunctions, "_WDFFUNCTIONS"):
     #    print("The _WDFFUNCTIONS struct wasn't found in the database")

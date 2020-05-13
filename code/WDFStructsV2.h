@@ -6161,14 +6161,22 @@ struct _WDFFUNCTIONS_V100 {
     PFN_WDFWORKITEMENQUEUE                                    pfnWdfWorkItemEnqueue;
     PFN_WDFWORKITEMGETPARENTOBJECT                            pfnWdfWorkItemGetParentObject;
     PFN_WDFWORKITEMFLUSH                                      pfnWdfWorkItemFlush;
+};
+
+struct _WDFFUNCTIONS_V101 {
+    _WDFFUNCTIONS_V100                                        v100;
     PFN_WDFCOMMONBUFFERCREATEWITHCONFIG                       pfnWdfCommonBufferCreateWithConfig;
     PFN_WDFDMAENABLERGETFRAGMENTLENGTH                        pfnWdfDmaEnablerGetFragmentLength;
     PFN_WDFDMAENABLERWDMGETDMAADAPTER                         pfnWdfDmaEnablerWdmGetDmaAdapter;
+};
+
+struct _WDFFUNCTIONS_V105 {
+    _WDFFUNCTIONS_V101                                        v101;
     PFN_WDFUSBINTERFACEGETNUMSETTINGS                         pfnWdfUsbInterfaceGetNumSettings;
 };
 
-union _WDFFUNCTIONS_V105 {
-    _WDFFUNCTIONS_V100                                        u;
+struct _WDFFUNCTIONS_V109 {
+    _WDFFUNCTIONS_V105                                        v105;
     PFN_WDFDEVICEREMOVEDEPENDENTUSAGEDEVICEOBJECT             pfnWdfDeviceRemoveDependentUsageDeviceObject;
     PFN_WDFDEVICEGETSYSTEMPOWERACTION                         pfnWdfDeviceGetSystemPowerAction;
     PFN_WDFINTERRUPTSETEXTENDEDPOLICY                         pfnWdfInterruptSetExtendedPolicy;
@@ -6180,8 +6188,8 @@ union _WDFFUNCTIONS_V105 {
     PFN_WDFREQUESTFORWARDTOPARENTDEVICEIOQUEUE                pfnWdfRequestForwardToParentDeviceIoQueue;
 };
 
-union _WDFFUNCTIONS_V109 {
-    _WDFFUNCTIONS_V105                                        u;
+struct _WDFFUNCTIONS_V111 {
+    _WDFFUNCTIONS_V109                                        v109;
     PFN_WDFCXDEVICEINITALLOCATE                               pfnWdfCxDeviceInitAllocate;
     PFN_WDFCXDEVICEINITASSIGNWDMIRPPREPROCESSCALLBACK         pfnWdfCxDeviceInitAssignWdmIrpPreprocessCallback;
     PFN_WDFCXDEVICEINITSETIOINCALLERCONTEXTCALLBACK           pfnWdfCxDeviceInitSetIoInCallerContextCallback;
@@ -6220,8 +6228,8 @@ union _WDFFUNCTIONS_V109 {
     PFN_WDFGETTRIAGEINFO                                      pfnWdfGetTriageInfo;
 };
 
-union _WDFFUNCTIONS_V111 {
-    _WDFFUNCTIONS_V109                                        u;
+struct _WDFFUNCTIONS_V113 {
+    _WDFFUNCTIONS_V111                                        v111;
     PFN_WDFDEVICEINITSETIOTYPEEX                              pfnWdfDeviceInitSetIoTypeEx;
     PFN_WDFDEVICEQUERYPROPERTYEX                              pfnWdfDeviceQueryPropertyEx;
     PFN_WDFDEVICEALLOCANDQUERYPROPERTYEX                      pfnWdfDeviceAllocAndQueryPropertyEx;
@@ -6230,25 +6238,37 @@ union _WDFFUNCTIONS_V111 {
     PFN_WDFFDOINITALLOCANDQUERYPROPERTYEX                     pfnWdfFdoInitAllocAndQueryPropertyEx;
 };
 
-union _WDFFUNCTIONS_V113 {
-    _WDFFUNCTIONS_V111                                        u;
+struct _WDFFUNCTIONS_V115 {
+    _WDFFUNCTIONS_V113                                        v113;
     PFN_WDFDEVICESTOPIDLEACTUAL                               pfnWdfDeviceStopIdleActual;
     PFN_WDFDEVICERESUMEIDLEACTUAL                             pfnWdfDeviceResumeIdleActual;
-};
-
-union _WDFFUNCTIONS_V115 {
-    _WDFFUNCTIONS_V113                                        u;
     PFN_WDFDEVICEGETSELFIOTARGET                              pfnWdfDeviceGetSelfIoTarget;
     PFN_WDFDEVICEINITALLOWSELFIOTARGET                        pfnWdfDeviceInitAllowSelfIoTarget;
     PFN_WDFIOTARGETSELFASSIGNDEFAULTIOQUEUE                   pfnWdfIoTargetSelfAssignDefaultIoQueue;
     PFN_WDFDEVICEOPENDEVICEMAPKEY                             pfnWdfDeviceOpenDevicemapKey;
+};
+
+struct _WDFFUNCTIONS_V119 {
+    _WDFFUNCTIONS_V115                                        v115;
     PFN_WDFDMATRANSACTIONSETSINGLETRANSFERREQUIREMENT         pfnWdfDmaTransactionSetSingleTransferRequirement;
     PFN_WDFCXDEVICEINITSETPNPPOWEREVENTCALLBACKS              pfnWdfCxDeviceInitSetPnpPowerEventCallbacks;
+};
+
+struct _WDFFUNCTIONS_V121 {
+    _WDFFUNCTIONS_V119                                        v119;
     PFN_WDFFILEOBJECTGETINITIATORPROCESSID                    pfnWdfFileObjectGetInitiatorProcessId;
     PFN_WDFREQUESTGETREQUESTORPROCESSID                       pfnWdfRequestGetRequestorProcessId;
+};
+
+struct _WDFFUNCTIONS_V123 {
+    _WDFFUNCTIONS_V121                                        v121;
     PFN_WDFDEVICERETRIEVECOMPANIONTARGET                      pfnWdfDeviceRetrieveCompanionTarget;
     PFN_WDFCOMPANIONTARGETSENDTASKSYNCHRONOUSLY               pfnWdfCompanionTargetSendTaskSynchronously;
     PFN_WDFCOMPANIONTARGETWDMGETCOMPANIONPROCESS              pfnWdfCompanionTargetWdmGetCompanionProcess;
+};
+
+struct _WDFFUNCTIONS_V125 {
+    _WDFFUNCTIONS_V123                                        v123;
     PFN_WDFDRIVEROPENPERSISTENTSTATEREGISTRYKEY               pfnWdfDriverOpenPersistentStateRegistryKey;
     PFN_WDFDRIVERERRORREPORTAPIMISSING                        pfnWdfDriverErrorReportApiMissing;
 };
