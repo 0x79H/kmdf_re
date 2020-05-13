@@ -484,6 +484,8 @@ if len(list_xref_to_wdf_callback(OFFSET_WdfIoQueueCreate)) == 0:
     print("The driver is not creating an IOQueue")
 if len(list_xref_to_wdf_callback(OFFSET_WdfDeviceInitSetIoIncallerContextCallback)) == 0:
     print("The driver is not setting an EvtInCallerContextCallback")
+for i in list_xref_to_wdf_callback(OFFSET_WdfIoQueueCreate):
+    print "Call To WdfIoQueueCreate: " + hex(i)
 for i in list_xref_to_wdf_callback(OFFSET_WdfRequestRetrieveInputMemory):
     print "Call To WdfRequestRetrieveInputMemory: " + hex(i)
 for i in list_xref_to_wdf_callback(OFFSET_WdfRequestRetrieveOutputMemory):
