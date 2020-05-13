@@ -394,18 +394,41 @@ def assign_kmdf_structure_types(address):
     argument_WdfComponentGlobals = find_function_arg(call_wdfVersionBind, "lea", "r9", 0)
     wdfComponentGlobals = idc.GetOperandValue(argument_WdfComponentGlobals, 1)
     g_vars["_WDF_COMPONENT_GLOBALS"] = wdfComponentGlobals
+    idc.SetType(wdfComponentGlobals, "PWDF_DRIVER_GLOBALS")
     idc.MakeName(wdfComponentGlobals, '_WdfComponentGlobals')
 
     # Now assign the WDFFUNCTIONS to FuncTable
     wdfFunctions = idc.Qword(wdfBindInfo+0x20)
     g_vars["_WDFFUNCTIONS"] = wdfFunctions
-    assign_struct_to_address(wdfFunctions, "_WDFFUNCTIONS")
+
+    # get wdf version
+    version = idc.Dword(wdfBindInfo + 0x14)
+    print('WDF minor version ' + str(version))
+
+    def get_wdffunctions_struct_name(version):
+        name = "_WDFFUNCTIONS_V100"
+
+        if version >= 5 and version < 9:
+             name = "_WDFFUNCTIONS_V105"
+        elif version >= 9 and version < 11:
+            name = "_WDFFUNCTIONS_V109"
+        elif version >= 11 and version < 13:
+            name = "_WDFFUNCTIONS_V111"
+        elif version >= 13 and version < 15:
+            name = "_WDFFUNCTIONS_V113"
+        elif version > 15:
+            name = "_WDFFUNCTIONS_V115"
+
+        return name
+
+    struct_name = get_wdffunctions_struct_name(version)
+    assign_struct_to_address(wdfFunctions, struct_name)
     idc.MakeName(wdfFunctions, 'g_WdfF_Functions')
     #if not assign_struct_to_address(wdfFunctions, "_WDFFUNCTIONS"):
     #    print("The _WDFFUNCTIONS struct wasn't found in the database")
     #    return
 
-
+    print('Applied type %s to g_WdfF_Functions' % struct_name)
 
 # Callback to get the EA of WdfVersionBind
 def imp_cb(ea, name, ord):
@@ -425,7 +448,7 @@ def imp_cb(ea, name, ord):
 def load_kmdf_types_into_idb():
     header_path = idautils.GetIdbDir()
     # change relative path to use more easily
-    idaapi.idc_parse_types("".join([header_path, "../Tools/kmdf_re/code/WDFStructs.h"]), idc.PT_FILE)
+    idaapi.idc_parse_types("".join([header_path, "../Tools/kmdf_re/code/WDFStructsV2.h"]), idc.PT_FILE)
     for idx in range(1, idc.GetMaxLocalType()):
         print(idx, idc.GetLocalTypeName(idx))
         idc.Til2Idb(idx, idc.GetLocalTypeName(idx))
