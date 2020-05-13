@@ -416,7 +416,7 @@ def assign_kmdf_structure_types(address):
             name = "_WDFFUNCTIONS_V111"
         elif version >= 13 and version < 15:
             name = "_WDFFUNCTIONS_V113"
-        elif version > 15:
+        elif version >= 15:
             name = "_WDFFUNCTIONS_V115"
 
         return name
