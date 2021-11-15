@@ -35,7 +35,16 @@ def print_guid(guid):
     data += "{:#04x},".format(part3)
     data += ",".join(["{:#02x}".format(_) for _ in guid[8:]])
     data += ")"
+    data2 = "{"
+    data2 += "{:08x}-".format(part1)
+    data2 += "{:04x}-".format(part2)
+    data2 += "{:04x}-".format(part3)
+    part4 = struct.unpack("<H", guid[8:10])[0]
+    data2 += "{:04x}-".format(part4)
+    data2 += "".join(["{:02x}".format(_) for _ in guid[10:]])
+    data2 += "}"
     print(data)
+    print(data2)
 
 def function_stack_erased(func_ea):
     if func_ea.startEA in g_functions_stack:
@@ -429,8 +438,10 @@ def assign_kmdf_structure_types(address):
             name = '_WDFFUNCTIONS_V121'
         elif version >= 23 and version < 25:
             name = '_WDFFUNCTIONS_V123'
-        elif version >= 25:
+        elif version >= 25 and version < 31:
             name = '_WDFFUNCTIONS_V125'
+        elif version >= 31:
+            name = '_WDFFUNCTIONS_V131'
 
         return name
 
@@ -467,7 +478,8 @@ def load_kmdf_types_into_idb():
     header_path = idautils.GetIdbDir()
     # change relative path to use more easily
     print("".join([header_path, "WDFStructsV2.h"]))
-    idaapi.idc_parse_types("".join([header_path, "WDFStructsV2.h"]), idc.PT_FILE)
+    print(__file__+"../WDFStructsV2.h")
+    idaapi.idc_parse_types("".join([__file__, "/../WDFStructsV2.h"]), idc.PT_FILE)
     for idx in range(1, idc.GetMaxLocalType()):
         print(idx, idc.GetLocalTypeName(idx))
         idc.Til2Idb(idx, idc.GetLocalTypeName(idx))
