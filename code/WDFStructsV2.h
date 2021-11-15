@@ -1,4 +1,3 @@
-
 /*
 In KMDF, the first parameter into the pfnWdfCallbacks is the WdfDriverGlobals object (goes in RCX), so when we say:
 
@@ -13,6 +12,18 @@ and so on
 This doesn't apply to Evt*Routines like EvtIoDeviceControl.
 */
 
+typedef PVOID PIO_RESOURCE_DESCRIPTOR;
+typedef PVOID PFN_WDFDEVICEGETFILEOBJECT;
+
+typedef struct _WDF_BIND_INFO2 {
+    WDF_BIND_INFO       V1;
+    UINT * MinimumVersionRequired;
+    BOOLEAN           * ClientVersionHigherThanFramework;
+    ULONG             * FuncCountPtr;
+    ULONG             * StructCountPtr;
+    size_t   * StructTable;
+
+} WDF_BIND_INFO2, * PWDF_BIND_INFO2;
 enum _MAJOR_FUNCTIONS {
 	 DispatchCreate,
    DispatchCreateNamedPipe,
@@ -98,36 +109,46 @@ typedef _DRIVER_OBJECT * PDRIVER_OBJECT;
 typedef void * PVPB;
 typedef unsigned short DEVICE_TYPE;
 
-struct _DEVICE_OBJECT {
-  CSHORT                   Type;
-  USHORT                   Size;
-  LONG                     ReferenceCount;
-  struct _DRIVER_OBJECT    *DriverObject;
-  struct _DEVICE_OBJECT    *NextDevice;
-  struct _DEVICE_OBJECT    *AttachedDevice;
-  struct _IRP              *CurrentIrp;
-  PIO_TIMER                Timer;
-  ULONG                    Flags;
-  ULONG                    Characteristics;
-  volatile PVPB            Vpb;
-  PVOID                    DeviceExtension;
-  DEVICE_TYPE              DeviceType;
-  CCHAR                    StackSize;
-  union {
-    LIST_ENTRY         ListEntry;
-    WAIT_CONTEXT_BLOCK Wcb;
-  } Queue;
-  ULONG                    AlignmentRequirement;
-  KDEVICE_QUEUE            DeviceQueue;
-  KDPC                     Dpc;
-  ULONG                    ActiveThreadCount;
-  PSECURITY_DESCRIPTOR     SecurityDescriptor;
-  KEVENT                   DeviceLock;
-  USHORT                   SectorSize;
-  USHORT                   Spare1;
-  struct _DEVOBJ_EXTENSION *DeviceObjectExtension;
-  PVOID                    Reserved;
-};
+typedef struct _IO_TIMER
+{
+     SHORT Type;
+     SHORT TimerFlag;
+     LIST_ENTRY TimerList;
+     PVOID TimerRoutine;
+     PVOID Context;
+     PDEVICE_OBJECT DeviceObject;
+} IO_TIMER, *PIO_TIMER;
+
+//struct _DEVICE_OBJECT {
+//  CSHORT                   Type;
+//  USHORT                   Size;
+//  LONG                     ReferenceCount;
+//  struct _DRIVER_OBJECT    *DriverObject;
+//  struct _DEVICE_OBJECT    *NextDevice;
+//  struct _DEVICE_OBJECT    *AttachedDevice;
+//  struct _IRP              *CurrentIrp;
+//  PIO_TIMER                Timer;
+//  ULONG                    Flags;
+//  ULONG                    Characteristics;
+//  volatile PVPB            Vpb;
+//  PVOID                    DeviceExtension;
+//  DEVICE_TYPE              DeviceType;
+//  CCHAR                    StackSize;
+//  union {
+//    LIST_ENTRY         ListEntry;
+//    WAIT_CONTEXT_BLOCK Wcb;
+//  } Queue;
+//  ULONG                    AlignmentRequirement;
+//  KDEVICE_QUEUE            DeviceQueue;
+//  KDPC                     Dpc;
+//  ULONG                    ActiveThreadCount;
+//  PSECURITY_DESCRIPTOR     SecurityDescriptor;
+//  KEVENT                   DeviceLock;
+//  USHORT                   SectorSize;
+//  USHORT                   Spare1;
+//  struct _DEVOBJ_EXTENSION *DeviceObjectExtension;
+//  PVOID                    Reserved;
+//};
 
 typedef _DEVICE_OBJECT DEVICE_OBJECT;
 typedef _DEVICE_OBJECT * PDEVICE_OBJECT;
@@ -1618,8 +1639,11 @@ enum _WDF_DEVICE_FAILED_ACTION {
 
 typedef _WDF_DEVICE_FAILED_ACTION WDF_DEVICE_FAILED_ACTION;
 
+typedef PVOID PWDFCXDEVICE_INIT;
 typedef PVOID PWDF_DRIVER_GLOBALS;
 typedef void VOID;
+typedef PWDFCX_POWER_POLICY_EVENT_CALLBACKS PWDFCX_PNPPOWER_EVENT_CALLBACKS_V1_29;
+
 
 typedef NTSTATUS (__fastcall * EVT_WDFDEVICE_WDM_IRP_PREPROCESS)(
     WDFDEVICE Device,
@@ -1706,7 +1730,7 @@ typedef _WDF_DMA_ENABLER_CONFIG WDF_DMA_ENABLER_CONFIG;
 typedef _WDF_DMA_ENABLER_CONFIG * PWDF_DMA_ENABLER_CONFIG;
 
 typedef PVOID WDFCONTEXT;
-
+typedef PVOID PSCATTER_GATHER_LIST;
 typedef BOOLEAN (__fastcall * EVT_WDF_PROGRAM_DMA)(
     WDFDMATRANSACTION Transaction,
     WDFDEVICE Device,
@@ -2632,6 +2656,7 @@ typedef NTSTATUS (__fastcall * EVT_WDFDEVICE_WDM_IRP_DISPATCH)(
 );
 
 typedef EVT_WDFDEVICE_WDM_IRP_DISPATCH * PFN_WDFDEVICE_WDM_IRP_DISPATCH;
+typedef PVOID DMA_WIDTH;
 
 struct _WDF_DMA_SYSTEM_PROFILE_CONFIG {
     ULONG                 Size;
@@ -2885,6 +2910,43 @@ struct _WDF_USB_CONTINUOUS_READER_CONFIG {
 
 typedef _WDF_USB_CONTINUOUS_READER_CONFIG WDF_USB_CONTINUOUS_READER_CONFIG;
 typedef _WDF_USB_CONTINUOUS_READER_CONFIG * PWDF_USB_CONTINUOUS_READER_CONFIG;
+//====
+
+
+typedef struct _WDFCX_PNPPOWER_EVENT_CALLBACKS_V1_29 {
+
+    ULONG Size;
+
+    PVOID EvtCxDevicePrePrepareHardware;
+    PVOID EvtCxDevicePrePrepareHardwareFailedCleanup;
+    PVOID EvtCxDevicePostPrepareHardware;
+    PVOID EvtCxDevicePreReleaseHardware;
+    PVOID EvtCxDevicePostReleaseHardware;
+    PVOID EvtCxDevicePreD0Entry;
+    PVOID EvtCxDevicePreD0EntryFailedCleanup;
+    PVOID EvtCxDevicePostD0Entry;
+    PVOID EvtCxDevicePreD0Exit;
+    PVOID EvtCxDevicePostD0Exit;
+
+    PVOID EvtCxDevicePreSurpriseRemoval;
+    PVOID EvtCxDevicePostSurpriseRemoval;
+
+    PVOID EvtCxDevicePreSelfManagedIoInit;
+    PVOID EvtCxDevicePreSelfManagedIoInitFailedCleanup;
+    PVOID EvtCxDevicePostSelfManagedIoInit;
+    PVOID EvtCxDevicePreSelfManagedIoRestart;
+    PVOID EvtCxDevicePreSelfManagedIoRestartFailedCleanup;
+    PVOID EvtCxDevicePostSelfManagedIoRestart;
+    PVOID EvtCxDevicePreSelfManagedIoSuspend;
+    PVOID EvtCxDevicePostSelfManagedIoSuspend;
+    PVOID EvtCxDevicePreSelfManagedIoFlush;
+    PVOID EvtCxDevicePostSelfManagedIoFlush;
+    PVOID EvtCxDevicePreSelfManagedIoCleanup;
+    PVOID EvtCxDevicePostSelfManagedIoCleanup;
+
+} WDFCX_PNPPOWER_EVENT_CALLBACKS_V1_29, *PWDFCX_PNPPOWER_EVENT_CALLBACKS_V1_29;
+
+
 
 //====
 
@@ -3435,7 +3497,7 @@ typedef VOID (__fastcall * PFN_WDFDEVICERESUMEIDLENOTRACK)(
     PWDF_DRIVER_GLOBALS DriverGlobals,
     WDFDEVICE Device
 );
-
+typedef PVOID PFILE_OBJECT;
 typedef WDFFILEOBJECT (__fastcall * PFN_WDFDEVICEGETFILEOBJECT)(
     PWDF_DRIVER_GLOBALS DriverGlobals,
     WDFDEVICE Device,
@@ -3591,6 +3653,7 @@ typedef WDFOBJECT (__fastcall * PFN_WDFDPCGETPARENTOBJECT)(
     WDFDPC Dpc
 );
 
+typedef PVOID PKDPC;
 typedef PKDPC (__fastcall * PFN_WDFDPCWDMGETDPC)(
     PWDF_DRIVER_GLOBALS DriverGlobals,
     WDFDPC Dpc
@@ -3796,6 +3859,7 @@ typedef VOID (__fastcall * PFN_WDFINTERRUPTDISABLE)(
     WDFINTERRUPT Interrupt
 );
 
+typedef PVOID PKINTERRUPT;
 typedef PKINTERRUPT (__fastcall * PFN_WDFINTERRUPTWDMGETINTERRUPT)(
     PWDF_DRIVER_GLOBALS DriverGlobals,
     WDFINTERRUPT Interrupt
@@ -5367,6 +5431,7 @@ typedef size_t (__fastcall * PFN_WDFDMAENABLERGETFRAGMENTLENGTH)(
     WDF_DMA_DIRECTION DmaDirection
 );
 
+typedef PVOID PDMA_ADAPTER;
 typedef PDMA_ADAPTER (__fastcall * PFN_WDFDMAENABLERWDMGETDMAADAPTER)(
     PWDF_DRIVER_GLOBALS DriverGlobals,
     WDFDMAENABLER DmaEnabler,
@@ -5755,6 +5820,7 @@ typedef NTSTATUS (__fastcall * PFN_WDFCOMPANIONTARGETSENDTASKSYNCHRONOUSLY)(
     PULONG_PTR BytesReturned
 );
 
+typedef PVOID PEPROCESS;
 typedef PEPROCESS (__fastcall * PFN_WDFCOMPANIONTARGETWDMGETCOMPANIONPROCESS)(
     PWDF_DRIVER_GLOBALS DriverGlobals,
     WDFCOMPANIONTARGET CompanionTarget
@@ -5776,6 +5842,39 @@ typedef NTSTATUS (__fastcall * PFN_WDFDRIVERERRORREPORTAPIMISSING)(
     BOOLEAN DoesApiReturnNtstatus
 );
 
+typedef NTSTATUS (__fastcall * PFN_WdfDeviceRetrieveDeviceDirectoryString)(
+    PWDF_DRIVER_GLOBALS DriverGlobals,
+    WDFDEVICE Device,
+    WDFSTRING String
+    );
+typedef NTSTATUS (__fastcall * PFN_WdfDriverRetrieveDriverDataDirectoryString)(
+    PWDF_DRIVER_GLOBALS DriverGlobals,
+    WDFDRIVER Driver,
+    WDFSTRING String
+    );
+typedef NTSTATUS (__fastcall * PFN_WdfCxDeviceInitAllocateContext)(
+    PWDF_DRIVER_GLOBALS DriverGlobals,
+    PWDFDEVICE_INIT DeviceInit,
+    PWDF_OBJECT_ATTRIBUTES ContextAttributes,
+    PVOID* Context
+    );
+typedef PVOID (__fastcall * PFN_WdfCxDeviceInitGetTypedContextWorker)(
+    PWDF_DRIVER_GLOBALS DriverGlobals,
+    PWDFDEVICE_INIT DeviceInit,
+    PCWDF_OBJECT_CONTEXT_TYPE_INFO TypeInfo
+    );
+typedef VOID (__fastcall * PFN_WdfCxDeviceInitSetPowerPolicyEventCallbacks)(
+    PWDF_DRIVER_GLOBALS DriverGlobals,
+    PWDFCXDEVICE_INIT CxDeviceInit,
+    PWDFCX_POWER_POLICY_EVENT_CALLBACKS CxPowerPolicyCallbacks
+    );
+typedef VOID (__fastcall * PFN_WdfDeviceSetDeviceInterfaceStateEx)(
+    PWDF_DRIVER_GLOBALS DriverGlobals,
+    WDFDEVICE Device,
+    GUID* InterfaceClassGUID,
+    PCUNICODE_STRING ReferenceString,
+    BOOLEAN IsInterfaceEnabled
+    );
 
 struct _WDFFUNCTIONS_V100 {
     PFN_WDFCHILDLISTCREATE                                    pfnWdfChildListCreate;
@@ -6271,6 +6370,17 @@ struct _WDFFUNCTIONS_V125 {
     _WDFFUNCTIONS_V123                                        v123;
     PFN_WDFDRIVEROPENPERSISTENTSTATEREGISTRYKEY               pfnWdfDriverOpenPersistentStateRegistryKey;
     PFN_WDFDRIVERERRORREPORTAPIMISSING                        pfnWdfDriverErrorReportApiMissing;
+};
+
+struct _WDFFUNCTIONS_V131 {
+    _WDFFUNCTIONS_V125                                        v125;
+    PFN_WdfDeviceRetrieveDeviceDirectoryString                pfnWdfDeviceRetrieveDeviceDirectoryString;
+    PFN_WdfDriverRetrieveDriverDataDirectoryString            pfnWdfDriverRetrieveDriverDataDirectoryString;
+    PFN_WdfCxDeviceInitAllocateContext                        pfnWdfCxDeviceInitAllocateContext;
+    PFN_WdfCxDeviceInitGetTypedContextWorker                  pfnWdfCxDeviceInitGetTypedContextWorker;
+    PFN_WdfCxDeviceInitSetPowerPolicyEventCallbacks           pfnWdfCxDeviceInitSetPowerPolicyEventCallbacks;
+    PFN_WdfDeviceSetDeviceInterfaceStateEx                    pfnWdfDeviceSetDeviceInterfaceStateEx;
+
 };
 
 #define FILE_DEVICE_8042_PORT           0x00000027
